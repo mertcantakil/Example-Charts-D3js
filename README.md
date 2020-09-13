@@ -1,2 +1,4 @@
-# Example-Charts--D3js
- Example d3js charts
+# Basic Chart Examples
+  Basic charts with dummy json data
+  d3.v3 example charts 
+  
