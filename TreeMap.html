@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+ 
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<head>
+  <title>Treemap</title>
+  <style>
+    body {
+      margin: auto;
+      position: relative;
+      background-color:#f7f7f7;
+      font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+      text-align: center; 
+    }
+    .card {
+        margin: 0 auto; /* Added */
+        float: none; /* Added */
+        margin-bottom: 10px; /* Added */
+        max-width: 50%; 
+        max-height: 90%;
+        background-color: #fff !important;
+        margin-top:30px;
+   }
+
+    .node {
+      border: solid 4px white;
+      font: 14px sans-serif;
+      line-height: 12px;
+      overflow: hidden;
+      position: absolute;
+      text-indent: 2px;
+      font-weight: bold;
+      color: #fff;
+    }
+    #wrapper{
+      margin-left:20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card bg-light mb-3 shadow p-3 mb-5 bg-white rounded">
+   
+    <div class="card-body">
+      <h5 class="card-title">Treemap Chart</h5>
+      <div id="wrapper">
+
+      </div>
+    </div>
+  </div>
+ 
+  <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script>
+    var root = {
+      "name": "HMM",
+      "children": [
+        {
+          "name": "Item",
+          "children": [
+            { "name": "Item", "size": 14.345 }
+          ]
+        },
+        {
+          "name": "Item",
+          "children": [
+            { "name": "Item", "size": 24.305 }
+          ]
+        },
+        {
+          "name": "Item",
+          "children": [
+            { "name": "Item", "size": 15.917 }
+          ]
+        },
+        {
+          "name": "Item",
+          "children": [
+            { "name": "Item", "size": 38.298 }
+          ]
+        }
+        ,
+        {
+          "name": "Item",
+          "children": [
+            { "name": "Item", "size": 18.298 }
+          ]
+        }
+        ,
+        {
+          "name": "Item",
+          "children": [
+            { "name": "Item", "size": 8.298 }
+          ]
+        }
+      ]
+    };
+
+    var margin = { top: 20, right: 10, bottom: 20, left: 30 },
+      width = 560 - margin.left - margin.right,
+      height = 300 - margin.top - margin.bottom;
+
+
+   var color = d3.scale.linear().domain([1,10])
+  .range(["purple", "blue"])
+   
+
+    var treemap = d3.layout.treemap()  //tree map özelliklerinin verildiği kısım
+      .size([width, height])
+      .sticky(true)
+      .value(function (d) { return d.size; })
+      .sort((a, b) => b.height - a.height || b.size - a.size); //büyükten küçüğe sıralama yapıldı.
+
+    var div = d3.select("#wrapper").append("div")
+      .style("position", "relative")
+      .style("width", (width + margin.left + margin.right) + "px")
+      .style("height", (height + margin.top + margin.bottom) + "px")
+      .style("left", margin.left + "px")
+      .style("top", margin.top + "px");
+
+    var node = div.datum(root).selectAll(".node") //nodeların eklendiği kısım, her biri için div açılıyor renk veriliyor.
+      .data(treemap.nodes)
+      .enter().append("div")
+      .attr("class", "node")
+      .call(position)
+      .style("background", function (d, i) { return d.children ? color(i) : null; })
+      
+
+    node.append("br") //bir alt satıra atmak içni textleri
+    node.append("tspan") //textlerin yazdırıldığı yer ve style verilen kısım (üst başlık)
+      .style("margin-left","10px")
+      .style("font-size","20px")
+      .text(function (d) { return d.name; });
+    
+    node.append("br") //bir alt satıra atmak içni textleri
+    node.append("br") //bir alt satıra atmak içni textleri
+    node.append("tspan") //textlerin yazdırıldığı yer ve style verilen kısım (alt başlık)
+      .style("font-size","16px")
+      .style("margin-left","10px")
+      .attr("dy", "1.0em")
+      .text(function (d) { return d.size; });
+
+    node
+      .data(treemap.value(function (d) { return d.size; }).nodes)
+      .transition()
+      .call(position);
+
+    function position() {
+      this.style("left", function (d) { return d.x + "px"; })
+        .style("top", function (d) { return d.y + "px"; })
+        .style("width", function (d) { return Math.max(0, d.dx - 1) + "px"; })
+        .style("height", function (d) { return Math.max(0, d.dy - 1) + "px"; });
+    }
+
+  
+  </script>
+</body>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    
+</html>

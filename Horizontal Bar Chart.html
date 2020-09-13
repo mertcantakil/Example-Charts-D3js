@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Simple Horizontal Bar chart</title>
+    <meta charset='utf-8' />
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+    <!--Style-->
+    <style>
+        body {
+            background-color:#f7f7f7;
+        font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+        text-align: center; 
+        }
+        
+        .bar {
+            fill: blueviolet;
+        }
+        
+        .axis {
+            font-size: 13px;
+        }
+        
+        .axis path,
+        .axis line {
+            fill: none;
+            display: none;
+        }
+        
+        .label {
+            font-size: 13px;
+        }
+        .card {
+        margin: 0 auto; /* Added */
+        float: none; /* Added */
+        margin-bottom: 10px; /* Added */
+        max-width: 50%; 
+        max-height: 90%;
+        background-color: #fff !important;
+        margin-top:30px;
+        }
+        
+    </style>
+
+</head>
+
+<body>
+    <!--Object Div-->
+    <div class="card bg-light mb-3 shadow p-3 mb-5 bg-white rounded">
+   
+        <div class="card-body">
+          <h5 class="card-title">Horizontal Bar Chart</h5>
+          <div id="graphic"></div>
+        </div>
+      </div>
+   
+
+    <script>
+        //example json data
+        var data = [{
+                "name": "Apples",
+                "value": 20,
+        },
+            {
+                "name": "Bananas",
+                "value": 12,
+        },
+            {
+                "name": "Grapes",
+                "value": 19,
+        },
+            {
+                "name": "Lemons",
+                "value": 5,
+        },
+            {
+                "name": "Limes",
+                "value": 16,
+        },
+            {
+                "name": "Oranges",
+                "value": 26,
+        },
+            {
+                "name": "Pears",
+                "value": 30,
+        }];
+
+        //sort bars based on value
+        data = data.sort(function (a, b) {
+            return d3.ascending(a.value, b.value);
+        })
+
+        //set up svg using margin conventions - we'll need plenty of room on the left for labels
+        var margin = {
+            top: 15,
+            right: 25,
+            bottom: 15,
+            left: 60
+        };
+
+        var width = 480 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        
+        var svg = d3.select("#graphic").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var x = d3.scale.linear()
+            .range([0, width])
+            .domain([0, d3.max(data, function (d) {
+                return d.value;
+            })]);
+
+        var y = d3.scale.ordinal()
+            .rangeRoundBands([height, 0], .6)
+            .domain(data.map(function (d) {
+                return d.name;
+            }));
+
+        //make y axis to show bar names
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            //no tick marks
+            .tickSize(0)
+            .orient("right");
+
+        var gy = svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+
+        var bars = svg.selectAll(".bar")
+            .data(data)
+            .enter()
+            .append("g")
+
+        //append rects
+        bars.append("rect")
+            .attr("class", "bar")
+            .attr("y", function (d) {
+                return y(d.name)+15;
+            })
+            .attr("height", y.rangeBand())
+            .attr("x", 0)
+            .attr("width", function (d) {
+                return x(d.value);
+            })
+            .attr("rx",5);
+
+        //add a value label to the right of each bar
+        bars.append("text")
+            .attr("class", "label")
+            //y position of the label is halfway down the bar
+            .attr("y", function (d) {
+                return y(d.name) + y.rangeBand() / 4 + 23;
+            })
+            //x position is 3 pixels to the right of the bar
+            .attr("x", function (d) {
+                return x(d.value) + 3;
+            })
+            .text(function (d) {
+                return d.value;
+            });
+        
+    </script>
+
+</body>
+ <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+</html>

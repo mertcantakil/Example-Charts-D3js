@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+ <!-- Bootstrap CSS -->
+ <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<style>
+  body{
+    background-color:#f7f7f7;
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    text-align: center; 
+  }
+  .card {
+        margin: 0 auto; /* Added */
+        float: none; /* Added */
+        margin-bottom: 10px; /* Added */
+        max-width: 50%; 
+        max-height: 90%;
+        background-color: #fff !important;
+        margin-top:30px;
+  }
+</style>
+<!-- Load d3.js & color scale -->
+<script src="https://d3js.org/d3.v3.js"></script>
+
+<div class="card bg-light mb-3 shadow p-3 mb-5 bg-white rounded">
+   
+  <div class="card-body">
+    <h5 class="card-title">Donut Chart</h5>
+    <div id="my_dataviz"></div>
+  </div>
+</div>
+
+<script>
+
+// set the dimensions and margins of the graph
+var width =1150
+    height = 500
+    margin = 60
+var legendRectSize = 0;      
+var legendSpacing = 4; 
+
+// The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+var radius = Math.min(width, height) / 2 - margin
+
+// append the svg object to the div called 'my_dataviz'
+var svg = d3.select("#my_dataviz")
+  .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+  .append("g")
+    .attr("transform", "translate(" + (width / 2 - 270)  + "," + (height / 2 -50) + ")");
+
+// Create dummy data
+var data = {a: 9, b: 20, c:15, d:8, e:12, f:16}
+
+// set the color scale
+var color = d3.scale.ordinal()
+  .domain(["a", "b", "c", "d", "e","f"])
+  .range(["#EA5355","#ecec13", "#236DD4","#05A34B","#FCB836","#7B4EFF"]);
+
+// Compute the position of each group on the pie:
+var pie = d3.layout.pie()
+  .sort(null) // Do not sort group by size
+  .value(function(d) {return d.value; })
+var data_ready = pie(d3.entries(data))
+
+// The arc generator
+var arc = d3.svg.arc()
+  .innerRadius(radius * 0.5)         // This is the size of the donut hole
+  .outerRadius(radius * 0.8)
+
+// Another arc that won't be drawn. Just for labels positioning
+var outerArc = d3.svg.arc()
+  .innerRadius(radius * 0.9)
+  .outerRadius(radius * 0.9)
+
+// Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+svg
+  .selectAll('allSlices')
+  .data(data_ready)
+  .enter()
+  .append('path')
+  .attr('d', arc)
+  .attr('fill', function(d){ return(color(d.data.key)) })
+  .attr("stroke", "white")
+  .style("stroke-width", "2px")
+  .style("opacity", 1)
+
+// Add the polylines between chart and labels:
+svg
+  .selectAll('allLabels')
+  .data(data_ready)
+  .enter()
+  .append('text')
+    .text( function(d) { console.log(d.data.value) ; return d.data.value+"%" } )
+    .attr('transform', function(d) {
+        var pos = outerArc.centroid(d);
+        return 'translate(' + pos + ')';
+    })
+    .style('text-anchor', function(d) {
+        var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
+        return (midangle < Math.PI ? 'start' : 'end')
+    })
+    .style('font-size','14px')
+
+
+var legend = svg.selectAll('.legend')                    
+			.data(color.domain())                                   
+			.enter()                                                
+			.append('g')                                           
+			.attr('class', 'legend')                                
+			.attr('transform', function(d, i) { 
+								
+				var height = legendRectSize + legendSpacing+25;        
+			
+        if(i==0){
+          var horz = legendRectSize-80;  
+          var vert = height + 175;
+        } else if(i == 1){
+          var horz = legendRectSize+20 ;  
+          var vert = height + 175;
+        }else if(i == 2){
+          var horz = legendRectSize-80 ;  
+          var vert = height + 200;     
+        }
+        else if(i == 3){
+          var horz = legendRectSize+20 ;  
+          var vert = height + 200;   
+        }
+        else if(i == 4){
+          var horz = legendRectSize-80 ;  
+          var vert = height + 225;      
+        }
+        else if(i == 5){
+          var horz = legendRectSize+20 ;  
+          var vert = height + 225;      
+        }
+			
+				return 'translate(' + horz + ',' + vert + ')';       
+      });                  
+      
+legend.append('rect')                                     
+			.attr('width', 6)                          
+			.attr('height', 6)                         
+			.style('fill', color)                                   
+			.style('stroke', color)
+			.style('rx', 15)
+			.style('ry', 15);                                       
+			
+      legend.append('text')     
+      .data(data_ready)                                
+			.attr('x', 12)              
+			.attr('y', 7)
+			.attr('fill','black')
+			.style('font-size','12px')              
+			.text(function(d,i) { return  d.data.value + "%"; });  
+
+
+</script>
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>

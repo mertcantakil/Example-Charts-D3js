@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<head>
+ <!-- Required meta tags -->
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+ <!-- Bootstrap CSS -->
+ <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <style>
+    body { 
+    margin:0;position:fixed;top:0;right:0;bottom:0;left:0; text-align: center; 
+    background-color:#f7f7f7;
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    }
+    .card {
+        margin: 0 auto; /* Added */
+        float: none; /* Added */
+        margin-bottom: 10px; /* Added */
+        max-width: 50%; 
+        max-height: 90%;
+         background-color: #fff !important;
+         margin-top:30px;
+  }
+  
+  </style>
+</head>
+
+<body>
+ 
+  <div class="card bg-light mb-3 shadow p-3 mb-5 bg-white rounded">
+   
+    <div class="card-body">
+      <h5 class="card-title">Radius Donut Chart</h5>
+      <div id="chart"></div>
+    </div>
+  </div>
+  
+  <script>
+    var data = [
+      {label:'Item', count: 45, percentage: 30},
+      {label:'Item', count: 35, percentage: 20},
+      {label:'Item', count: 25, percentage: 10}
+    ];
+    
+    var width = 540,
+    height = 540;
+    var donutWidth = 200; 
+    var innerRadius = (Math.min(width, height) / 2) - donutWidth; 
+    var legendRectSize = 18;      
+    var legendSpacing = 4;                                   
+
+    var color = d3.scale.ordinal().range(['#405FD6','#1DA022','#D51C30']); //Color 
+
+    var svg = d3.select('#chart')
+          .append('svg')
+          .attr('width', width+100) //SVG Width
+          .attr('height', height+100) //SVG Height
+          .append('g')
+          .attr('transform', 'translate(' + (width / 2 +50 ) +  //SVG Position
+            ',' + (height / 2 - 100) + ')');
+
+		var arc = d3.svg.arc()
+    	.innerRadius(innerRadius)
+    	.outerRadius(function(d){
+        return innerRadius + d.data.count; 
+      });
+
+		var pie = d3.layout.pie() 
+	    .sort(null)
+	    .value(function(d) {
+	        return d.count;
+	    });
+
+    var g = svg.selectAll(".arc")
+      .data(pie(data))
+      .enter().append("g");    
+
+   	g.append("path")
+    	.attr("d", arc)
+      .style("fill", function(d,i) {
+      	return color(i);
+      });
+
+    g.append("text")
+    	.attr("transform", function(d) {
+        var _d = arc.centroid(d);
+        _d[0] *= 1.5;	//multiply by a constant factor
+        _d[1] *= 1.5;	//multiply by a constant factor
+        return "translate(" + _d + ")";
+      })
+      .attr("dy", ".50em")
+      .style("text-anchor", "middle")
+      .text(function(d) {
+        if(d.data.percentage < 8) {
+          return '';
+        }
+        return d.data.percentage + '%';
+      });
+        
+    g.append("text")
+	   .attr("text-anchor", "middle")
+		 .attr('font-size', '1.5em')
+		 .attr('y', 15)
+	   .text("%");
+
+
+    // Add Legend
+     var legend = svg.selectAll('.legend')                    
+          .data(color.domain())                                   
+          .enter()                                                
+          .append('g')                                           
+          .attr('class', 'legend')                                
+          .attr('transform', function(d, i) { 
+                             
+            var height = legendRectSize + legendSpacing;         
+            var offset =  height * color.domain().length / 2;   
+            if(i==0){
+              var horz =  i * legendRectSize -70;  
+              var vert = height - offset + 200;       
+            }  else if(i == 1){
+              var horz =  i * legendRectSize;  
+              var vert = height - offset + 200;       
+            }
+            else{
+              var horz =  i * legendRectSize - 60; 
+              var vert = height - offset + 250;        
+            }
+            return 'translate(' + horz + ',' + vert + ')';       
+          });                                                     
+
+        legend.append('rect')                                     
+          .attr('width', 12)                          
+          .attr('height', 12)                         
+          .style('fill', color)                                   
+          .style('stroke', color)
+          .style('rx', 15)
+          .style('ry', 15);                                       
+          
+        legend.append('text')                                     
+          .attr('x', 17)              
+          .attr('y', 10)              
+          .text(function(d,i) { return data[i].label; });  
+
+               
+
+  </script>
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+</body>
