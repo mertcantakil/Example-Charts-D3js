@@ -1,4 +1,3 @@
-# Basic Chart Examples
-# Basic charts with dummy json data
-# d3.v3 example charts 
-  
+# Basic Chart Examples 
+  d3v3 charts with dummy json data 
+
